@@ -1,0 +1,103 @@
+<section class="page">
+  <header class="page-header">
+    <h1>Simulação de Crédito</h1>
+    <p>Informe os dados para simular as condições do seu empréstimo.</p>
+  </header>
+
+  <div class="page-grid">
+    <form class="card" [formGroup]="form" (ngSubmit)="simulate()">
+      <div class="field">
+        <label for="valor">Valor desejado</label>
+        <div class="input-prefix">
+          <span>R$</span>
+          <input
+            id="valor"
+            type="number"
+            formControlName="valor"
+            placeholder="50000"
+            min="1000"
+            max="500000"
+          />
+        </div>
+        @if (form.controls.valor.touched && form.controls.valor.invalid) {
+          <span class="error">Informe um valor entre R$ 1.000 e R$ 500.000</span>
+        }
+      </div>
+
+      <div class="field">
+        <label for="parcelas">Número de parcelas</label>
+        <select id="parcelas" formControlName="parcelas">
+          @for (option of parcelOptions; track option) {
+            <option [value]="option">{{ option }}x</option>
+          }
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="renda">Renda mensal</label>
+        <div class="input-prefix">
+          <span>R$</span>
+          <input
+            id="renda"
+            type="number"
+            formControlName="rendaMensal"
+            placeholder="5000"
+            min="1000"
+          />
+        </div>
+        @if (form.controls.rendaMensal.touched && form.controls.rendaMensal.invalid) {
+          <span class="error">Informe sua renda mensal</span>
+        }
+      </div>
+
+      <button type="submit" class="btn btn-primary" [disabled]="form.invalid || loading()">
+        {{ loading() ? 'Calculando...' : 'Simular' }}
+      </button>
+    </form>
+
+    <aside class="card result-card" [class.visible]="result()">
+      @if (result(); as sim) {
+        <h2>Resultado da simulação</h2>
+        <dl class="result-list">
+          <div class="result-item highlight">
+            <dt>Parcela mensal</dt>
+            <dd>{{ sim.valorParcela | currency: 'BRL' }}</dd>
+          </div>
+          <div class="result-item">
+            <dt>Taxa mensal</dt>
+            <dd>{{ sim.taxaMensal | number: '1.2-2' }}%</dd>
+          </div>
+          <div class="result-item">
+            <dt>CET anual</dt>
+            <dd>{{ sim.cetAnual | number: '1.2-2' }}%</dd>
+          </div>
+          <div class="result-item">
+            <dt>Total a pagar</dt>
+            <dd>{{ sim.totalPago | currency: 'BRL' }}</dd>
+          </div>
+          <div class="result-item">
+            <dt>Comprometimento da renda</dt>
+            <dd [class.warning]="sim.comprometimentoRenda > 30">
+              {{ sim.comprometimentoRenda | number: '1.1-1' }}%
+            </dd>
+          </div>
+        </dl>
+
+        @if (sim.comprometimentoRenda > 35) {
+          <p class="alert alert-warning">
+            O comprometimento de renda está acima de 35%. A análise pode resultar em recusa.
+          </p>
+        }
+
+        <button type="button" class="btn btn-primary" (click)="proceed()">
+          Continuar para Análise
+        </button>
+      } @else {
+        <div class="empty-state">
+          <span class="empty-icon">📊</span>
+          <p>Preencha o formulário e clique em <strong>Simular</strong> para ver o resultado.</p>
+        </div>
+      }
+    </aside>
+  </div>
+</section>
