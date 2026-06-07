@@ -1,0 +1,19 @@
+<nav class="stepper" aria-label="Etapas do crédito">
+  @for (step of steps; track step.id; let i = $index) {
+    <a
+      class="step"
+      [class.completed]="flow.isStepCompleted(step.id)"
+      [class.disabled]="!flow.canAccessStep(step.id)"
+      [routerLink]="flow.canAccessStep(step.id) ? step.route : null"
+      routerLinkActive="active"
+      [attr.aria-disabled]="!flow.canAccessStep(step.id)"
+      (click)="onStepClick($event, step.id)"
+    >
+      <span class="step-index">{{ i + 1 }}</span>
+      <span class="step-label">{{ step.label }}</span>
+    </a>
+    @if (i < steps.length - 1) {
+      <span class="connector" [class.completed]="flow.isStepCompleted(step.id)"></span>
+    }
+  }
+</nav>
