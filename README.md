@@ -1,59 +1,131 @@
-# Credit
+# CréditoFácil
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.13.
+Aplicação web em Angular para simulação e contratação de crédito pessoal, com fluxo guiado em múltiplas etapas.
 
-## Development server
+## Funcionalidades
 
-To start a local development server, run:
+- **Simulação** — cálculo de parcela, taxa, CET e comprometimento de renda
+- **Análise de crédito** — avaliação automática com score, fatores e decisão de aprovação
+- **Cadastro** — coleta de dados pessoais com validação e máscaras (CPF, telefone, CEP)
+- **Formalização** — captura biométrica facial e assinatura digital do contrato
 
-```bash
-ng serve
+O fluxo é sequencial: cada etapa só fica disponível após a conclusão da anterior.
+
+```
+Simulação → Análise → Cadastro → Formalização → Protocolo
+                ↘ (recusado) → Nova simulação
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+## Stack
 
-## Code scaffolding
+- Angular 21 (standalone components)
+- TypeScript 5.9
+- RxJS 7.8
+- Reactive Forms
+- Angular Signals
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Pré-requisitos
 
-```bash
-ng generate component component-name
-```
+- Node.js 20+
+- npm 10+
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
+## Instalação e execução
 
 ```bash
-ng build
+npm install
+npm start
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+A aplicação estará disponível em [http://localhost:4200](http://localhost:4200).
 
 ```bash
-ng test
+npm run build   # build de produção
+npm test        # testes unitários
 ```
 
-## Running end-to-end tests
+## Como testar o fluxo
 
-For end-to-end (e2e) testing, run:
+1. Acesse **Simulação** e informe valor, parcelas e renda mensal
+2. Clique em **Simular** e avance para **Análise de Crédito**
+3. Inicie a análise e aguarde o resultado (aprovação ou recusa)
+4. Se aprovado, preencha o **Cadastro** com dados válidos
+5. Na **Formalização**, capture a biometria, aceite os termos e assine o contrato
 
-```bash
-ng e2e
+> A biometria utiliza a câmera do dispositivo via `getUserMedia`. Caso não esteja disponível, a aplicação entra em modo de simulação.
+
+## Arquitetura
+
+A aplicação segue separação de responsabilidades em camadas:
+
+| Camada | Responsabilidade |
+|--------|------------------|
+| `models/` | Contratos e tipos do domínio |
+| `services/credit.service.ts` | Regras de negócio (simulação, análise, formalização) |
+| `services/credit-flow.service.ts` | Estado do fluxo entre etapas |
+| `pages/` | Telas do wizard |
+| `components/stepper/` | Indicador de progresso e navegação |
+
+### Serviços
+
+**`CreditService`** encapsula a lógica de negócio:
+
+- Cálculo de parcelas pela Tabela Price
+- Regras de aprovação (score mínimo 550, comprometimento de renda até 35%)
+- Geração de protocolo na formalização
+
+As operações de análise e formalização retornam `Observable` com delay simulado, preparando a troca por chamadas HTTP reais.
+
+**`CreditFlowService`** gerencia o estado da sessão com Angular Signals e controla o acesso às etapas via `canAccessStep()`.
+
+### Rotas
+
+As páginas são carregadas sob demanda com `loadComponent`:
+
+| Rota | Página |
+|------|--------|
+| `/simulacao` | Simulação de crédito |
+| `/analise` | Análise de crédito |
+| `/cadastro` | Cadastro do cliente |
+| `/formalizacao` | Biometria e contrato |
+
+## Estrutura do projeto
+
+```
+src/app/
+├── app.ts / app.html / app.css
+├── app.routes.ts
+├── app.config.ts
+├── models/
+│   └── credit.models.ts
+├── services/
+│   ├── credit.service.ts
+│   └── credit-flow.service.ts
+├── components/
+│   └── stepper/
+└── pages/
+    ├── simulation/
+    ├── analysis/
+    ├── registration/
+    └── formalization/
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+Cada componente possui arquivos separados (`.ts`, `.html`, `.css`).
 
-## Additional Resources
+## Decisões técnicas
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+- **Standalone components** — sem `NgModule`, alinhado ao padrão atual do Angular
+- **Signals + RxJS** — signals para estado síncrono do fluxo; RxJS para operações assíncronas
+- **Reactive Forms** — validações e máscaras nos formulários de simulação e cadastro
+- **Lazy loading** — redução do bundle inicial com carregamento por rota
+- **Mock de API** — regras de negócio isoladas no service, facilitando integração futura com backend
+
+## Escopo e limitações
+
+- Dados não são persistidos (estado em memória durante a sessão)
+- Análise de crédito e formalização utilizam respostas simuladas
+- Validação de CPF por formato, sem consulta a serviços externos
+- Biometria simula validação facial; não há integração com provedor de identidade
+
+## Licença
+
+Projeto desenvolvido como desafio técnico. Uso livre para avaliação.
