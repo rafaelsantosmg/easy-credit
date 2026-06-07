@@ -1,0 +1,119 @@
+<section class="page">
+  <header class="page-header">
+    <h1>Cadastro</h1>
+    <p>Preencha seus dados pessoais para dar continuidade à contratação.</p>
+  </header>
+
+  @if (!flow.canAccessStep('cadastro')) {
+    <div class="card alert alert-warning">
+      Complete a análise de crédito com aprovação antes de prosseguir.
+    </div>
+  } @else {
+    <form class="card form-card" [formGroup]="form" (ngSubmit)="submit()">
+      <fieldset>
+        <legend>Dados pessoais</legend>
+        <div class="form-row">
+          <div class="field">
+            <label for="nome">Nome completo</label>
+            <input id="nome" type="text" formControlName="nome" placeholder="João da Silva" />
+            @if (form.controls.nome.touched && form.controls.nome.invalid) {
+              <span class="error">Nome obrigatório (mín. 3 caracteres)</span>
+            }
+          </div>
+          <div class="field">
+            <label for="cpf">CPF</label>
+            <input
+              id="cpf"
+              type="text"
+              formControlName="cpf"
+              placeholder="000.000.000-00"
+              maxlength="14"
+              (input)="formatCpf($event)"
+            />
+            @if (form.controls.cpf.touched && form.controls.cpf.invalid) {
+              <span class="error">CPF inválido</span>
+            }
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="field">
+            <label for="email">E-mail</label>
+            <input id="email" type="email" formControlName="email" placeholder="joao@email.com" />
+            @if (form.controls.email.touched && form.controls.email.invalid) {
+              <span class="error">E-mail inválido</span>
+            }
+          </div>
+          <div class="field">
+            <label for="telefone">Telefone</label>
+            <input
+              id="telefone"
+              type="text"
+              formControlName="telefone"
+              placeholder="(11) 99999-9999"
+              maxlength="15"
+              (input)="formatPhone($event)"
+            />
+            @if (form.controls.telefone.touched && form.controls.telefone.invalid) {
+              <span class="error">Telefone inválido</span>
+            }
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="nascimento">Data de nascimento</label>
+          <input id="nascimento" type="date" formControlName="dataNascimento" />
+          @if (form.controls.dataNascimento.touched && form.controls.dataNascimento.invalid) {
+            <span class="error">Data de nascimento obrigatória</span>
+          }
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Endereço</legend>
+        <div class="form-row">
+          <div class="field field-sm">
+            <label for="cep">CEP</label>
+            <input
+              id="cep"
+              type="text"
+              formControlName="cep"
+              placeholder="00000-000"
+              maxlength="9"
+              (input)="formatCep($event)"
+            />
+          </div>
+          <div class="field field-grow">
+            <label for="endereco">Logradouro</label>
+            <input id="endereco" type="text" formControlName="endereco" placeholder="Rua Exemplo" />
+          </div>
+          <div class="field field-xs">
+            <label for="numero">Nº</label>
+            <input id="numero" type="text" formControlName="numero" placeholder="123" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="field field-grow">
+            <label for="cidade">Cidade</label>
+            <input id="cidade" type="text" formControlName="cidade" placeholder="São Paulo" />
+          </div>
+          <div class="field field-sm">
+            <label for="uf">UF</label>
+            <select id="uf" formControlName="uf">
+              <option value="">Selecione</option>
+              @for (uf of ufOptions; track uf) {
+                <option [value]="uf">{{ uf }}</option>
+              }
+            </select>
+          </div>
+        </div>
+      </fieldset>
+
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="goBack()">Voltar</button>
+        <button type="submit" class="btn btn-primary" [disabled]="form.invalid">Continuar</button>
+      </div>
+    </form>
+  }
+</section>
