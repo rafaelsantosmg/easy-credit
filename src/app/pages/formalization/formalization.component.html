@@ -1,0 +1,122 @@
+<section class="page">
+  <header class="page-header">
+    <h1>Formalização</h1>
+    <p>Valide sua identidade por biometria facial e assine o contrato digitalmente.</p>
+  </header>
+
+  @if (!flow.canAccessStep('formalizacao')) {
+    <div class="card alert alert-warning">
+      Complete o cadastro antes de prosseguir com a formalização.
+    </div>
+  } @else if (completed(); as result) {
+    <div class="card success-card">
+      <div class="success-icon">🎉</div>
+      <h2>Crédito formalizado com sucesso!</h2>
+      <dl class="protocol-info">
+        <div><dt>Protocolo</dt><dd>{{ result.protocolo }}</dd></div>
+        <div><dt>Data</dt><dd>{{ result.dataFormalizacao | date: 'dd/MM/yyyy HH:mm' }}</dd></div>
+        <div><dt>Cliente</dt><dd>{{ flow.customer()?.nome }}</dd></div>
+      </dl>
+      <p class="success-message">
+        O contrato foi assinado digitalmente e a biometria foi validada. Você receberá o comprovante por e-mail.
+      </p>
+      <button type="button" class="btn btn-primary" (click)="restart()">Nova solicitação</button>
+    </div>
+  } @else {
+    <div class="page-grid">
+      <div class="card biometry-card">
+        <h2>Biometria Facial</h2>
+        <p class="subtitle">Posicione seu rosto no centro do quadro e mantenha boa iluminação.</p>
+
+        <div class="camera-container">
+          @if (cameraError()) {
+            <div class="camera-fallback">
+              <div class="face-placeholder" [class.scanning]="biometryPhase() === 'capturing'">
+                <span class="face-icon">👤</span>
+                @if (biometryPhase() === 'capturing') {
+                  <div class="scan-line"></div>
+                }
+              </div>
+              <p class="fallback-note">Câmera indisponível — modo simulação ativo</p>
+            </div>
+          } @else {
+            <video #videoEl autoplay playsinline muted class="camera-feed" [class.hidden]="!streamActive()"></video>
+            @if (!streamActive()) {
+              <div class="camera-placeholder">
+                <span>📷</span>
+                <p>Aguardando câmera...</p>
+              </div>
+            }
+          }
+          <canvas #canvasEl class="hidden-canvas"></canvas>
+
+          @if (biometryPhase() === 'validated') {
+            <div class="validation-overlay success">
+              <span>✓</span> Biometria validada
+            </div>
+          }
+        </div>
+
+        <div class="biometry-actions">
+          @switch (biometryPhase()) {
+            @case ('idle') {
+              <button type="button" class="btn btn-primary" (click)="startCapture()">
+                Iniciar captura
+              </button>
+            }
+            @case ('capturing') {
+              <button type="button" class="btn btn-primary" (click)="captureBiometry()">
+                Capturar rosto
+              </button>
+              <button type="button" class="btn btn-secondary" (click)="stopCamera()">Cancelar</button>
+            }
+            @case ('captured') {
+              <button type="button" class="btn btn-primary" (click)="validateBiometry()">
+                Validar biometria
+              </button>
+              <button type="button" class="btn btn-secondary" (click)="retake()">Refazer</button>
+            }
+            @case ('validating') {
+              <button type="button" class="btn btn-primary" disabled>Validando...</button>
+            }
+            @case ('validated') {
+              <span class="validated-badge">Identidade confirmada</span>
+            }
+          }
+        </div>
+      </div>
+
+      <div class="card contract-card">
+        <h2>Contrato Digital</h2>
+
+        <div class="contract-preview">
+          <h3>Contrato de Crédito Pessoal</h3>
+          <p>
+            <strong>Contratante:</strong> {{ flow.customer()?.nome }}<br />
+            <strong>CPF:</strong> {{ flow.customer()?.cpf }}<br />
+            <strong>Valor:</strong> R$ {{ flow.simulationInput()?.valor | number }}<br />
+            <strong>Parcelas:</strong> {{ flow.simulationInput()?.parcelas }}x
+          </p>
+          <p class="contract-clause">
+            O CONTRATANTE declara estar ciente das condições do empréstimo, incluindo taxas,
+            CET e cronograma de pagamento, e autoriza o débito das parcelas conforme acordado.
+          </p>
+        </div>
+
+        <label class="checkbox-field">
+          <input type="checkbox" [checked]="termsAccepted()" (change)="toggleTerms($event)" />
+          <span>Li e aceito os termos do contrato de crédito</span>
+        </label>
+
+        <button
+          type="button"
+          class="btn btn-primary btn-full"
+          [disabled]="!canFormalize()"
+          (click)="formalize()"
+        >
+          {{ formalizing() ? 'Formalizando...' : 'Assinar e Formalizar' }}
+        </button>
+      </div>
+    </div>
+  }
+</section>
