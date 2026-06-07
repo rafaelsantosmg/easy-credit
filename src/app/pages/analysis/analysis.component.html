@@ -1,0 +1,104 @@
+<section class="page">
+  <header class="page-header">
+    <h1>Análise de Crédito</h1>
+    <p>Avaliação automática com base na simulação e perfil do solicitante.</p>
+  </header>
+
+  @if (!flow.canAccessStep('analise')) {
+    <div class="card alert alert-warning">
+      Complete a simulação antes de prosseguir.
+      <a routerLink="/simulacao" class="link">Ir para Simulação</a>
+    </div>
+  } @else {
+    <div class="page-grid">
+      <div class="card">
+        <h2>Resumo da solicitação</h2>
+        @if (flow.simulationInput(); as input) {
+          <dl class="summary-list">
+            <div><dt>Valor</dt><dd>{{ input.valor | currency: 'BRL' }}</dd></div>
+            <div><dt>Parcelas</dt><dd>{{ input.parcelas }}x</dd></div>
+            <div><dt>Renda</dt><dd>{{ input.rendaMensal | currency: 'BRL' }}</dd></div>
+          </dl>
+        }
+
+        @if (!analysis() && !analyzing()) {
+          <button type="button" class="btn btn-primary" (click)="runAnalysis()">
+            Iniciar Análise
+          </button>
+        }
+      </div>
+
+      <div class="card analysis-card">
+        @if (analyzing()) {
+          <div class="analyzing">
+            <div class="spinner"></div>
+            <h2>Analisando crédito...</h2>
+            <p>Consultando bureau, renda e histórico. Isso leva alguns segundos.</p>
+            <ul class="checklist">
+              <li [class.done]="checkStep() >= 1">Verificando score</li>
+              <li [class.done]="checkStep() >= 2">Calculando comprometimento</li>
+              <li [class.done]="checkStep() >= 3">Validando política interna</li>
+            </ul>
+          </div>
+        } @else if (analysis(); as result) {
+          <div
+            class="analysis-result"
+            [class.approved]="result.status === 'approved'"
+            [class.rejected]="result.status === 'rejected'"
+          >
+            <div class="status-badge">
+              {{ result.status === 'approved' ? '✓ Aprovado' : '✗ Não aprovado' }}
+            </div>
+
+            <div class="score-ring">
+              <span class="score-value">{{ result.score }}</span>
+              <span class="score-label">Score</span>
+            </div>
+
+            @if (result.status === 'approved') {
+              <p class="approved-text">
+                Limite aprovado: <strong>{{ result.limiteAprovado | currency: 'BRL' }}</strong>
+              </p>
+            } @else {
+              <p class="rejected-text">{{ result.motivo }}</p>
+            }
+
+            <h3>Fatores analisados</h3>
+            <ul class="factors">
+              @for (factor of result.fatores; track factor.label) {
+                <li [class]="factor.impacto">
+                  <span class="factor-icon">
+                    @switch (factor.impacto) {
+                      @case ('positivo') { + }
+                      @case ('negativo') { − }
+                      @default { • }
+                    }
+                  </span>
+                  <div>
+                    <strong>{{ factor.label }}</strong>
+                    <span>{{ factor.descricao }}</span>
+                  </div>
+                </li>
+              }
+            </ul>
+
+            @if (result.status === 'approved') {
+              <button type="button" class="btn btn-primary" (click)="proceed()">
+                Continuar para Cadastro
+              </button>
+            } @else {
+              <button type="button" class="btn btn-secondary" (click)="retry()">
+                Nova Simulação
+              </button>
+            }
+          </div>
+        } @else {
+          <div class="empty-state">
+            <span class="empty-icon">🔍</span>
+            <p>Clique em <strong>Iniciar Análise</strong> para avaliar o crédito.</p>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</section>
