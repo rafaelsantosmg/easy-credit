@@ -2,6 +2,23 @@
 
 Aplicação web em Angular para simulação e contratação de crédito pessoal, com fluxo guiado em múltiplas etapas.
 
+## Imagens
+
+<table>
+    <tr>
+        <td><a href="public/images/image01.jpeg"><img src="public/images/image01.jpeg" alt="Tela 1" width="280"></a></td>
+        <td><a href="public/images/image02.jpeg"><img src="public/images/image02.jpeg" alt="Tela 2" width="280"></a></td>
+        <td><a href="public/images/image03.jpeg"><img src="public/images/image03.jpeg" alt="Tela 3" width="280"></a></td>
+    </tr>
+    <tr>
+        <td><a href="public/images/image04.jpeg"><img src="public/images/image04.jpeg" alt="Tela 4" width="280"></a></td>
+        <td><a href="public/images/image05.jpeg"><img src="public/images/image05.jpeg" alt="Tela 5" width="280"></a></td>
+        <td><a href="public/images/image06.jpeg"><img src="public/images/image06.jpeg" alt="Tela 6" width="280"></a></td>
+    </tr>
+</table>
+
+Clique em qualquer imagem para abrir em tamanho cheio.
+
 ## Funcionalidades
 
 - **Simulação** — cálculo de parcela, taxa, CET e comprometimento de renda
